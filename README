@@ -1,0 +1,138 @@
+== What is this??
+
+This repo is put together to demo some of the stuff than can be done using AMQP/warren/etc.
+
+=== What is AMQP?
+
+Extract from the website:
+
+AMQP is an open Internet Protocol for Business Messaging.
+
+The official website is at http://www.amqp.org
+The specification can be found at http://www.amqp.org/confluence/display/AMQP/AMQP+Specification
+
+A host article on AMQP: http://www.igvita.com/2009/10/08/advanced-messaging-routing-with-amqp/
+
+There are quite a few open source implementations of the AMQP broker (list taken from http://github.com/tmm1/amqp/raw/abef873a778dc73ae9dc410199eb3422e5f8029f/README)
+
+RabbitMQ (Rabbit Technologies, Erlang/OTP, MPL) - http://rabbitmq.com
+ZeroMQ   (iMatix/FastMQ/Intel, C++, GPL3)       - http://www.zeromq.org
+OpenAMQ  (iMatix, C, GPL2)                      - http://openamq.org
+ActiveMQ (Apache Foundation, Java, apache2)     - http://activemq.apache.org
+
+RabbitMQ seems to be one of the most popular AMQP broker implementation at this time.
+
+=== RabbitMQ
+
+Homepage is at http://www.rabbitmq.com/
+RabbitMQ is a AMQP router/broker.
+
+RabbitMQ is arguably the most stable and feature complete broker implementation.
+
+Features:
+    * Erlang
+    * Load Balancing
+    * Failover
+    * Speed
+    * Binary
+    * Protocol in flux
+    
+There is a nice RESTful wrapper / web UI for RabbitMQ called Alice / Wonderland: http://willcodeforfoo.com/2009/07/13/announcing-alice/
+
+
+== Getting Started
+
+=== Installing RabbitMQ
+
+On Mac (using Darwin ports)
+1. sudo port sync
+2. sudo port install rabbitmq-server (this takes forever, since it has a lot of dependencies)
+3. sudo rabbitmq-server (start the broker, it has to be ran as root)
+
+Note after installing there is a default vhost "/" and a default user "guest" with password "guest" and read/write permissions on vhost "/"
+
+=== Configuring/working with RabbitMQ
+
+There is a rabbitmqctl command that can be ran as root to do all sorts of stuff. For a complete list of available commands run "sudo rabbitmqctl". A short list of the most useful.
+1. Create users: sudo rabbitmqctl add_user <username> <password>
+2. List users: sudo rabbitmqctl list_users
+3. Set permissions: sudo rabbitmqctl ...
+4. Add/delete vhosts: sudo rabbitmqctl add_vhost
+5. List queues: sudo rabbitmqctl list_queues (quite useful, lists all queues and their pending messages)
+6. Status: sudo rabbitmqctl status
+
+=== Other libraries
+
+The necessary gems to run the rails app are set in config/environment.rb. You can run "sudo rake gems:install".
+If you want to run the standalone examples for bunny/amqp/warren you will need bunny, amqp and warren depending on what you are trying out.
+
+sudo gem install amqp
+sudo gem install bunny
+sudo gem install warren
+
+== Ruby (client) libraries for AMQP
+
+=== amqp (async) ->  http://github.com/tmm1/amqp
+
+Implements async AMQP using EventMachine.
+
+This seems to cause problems when deploying with Passenger
+http://groups.google.com/group/ruby-amqp/browse_thread/thread/efbb509604d8c669/0553ae8834cf436a
+although there might be a solution:
+http://groups.google.com/group/ruby-amqp/msg/b20a0c96a3844b93
+
+To address that there is a plugin called Qusion (read further down)
+
+=== Qusion (makes AMQP work with Passenger) -> http://github.com/danielsdeleo/qusion
+
+Qusion makes AMQP work with your webserver with no fuss. It’s a simple library/plugin with three features:
+
+    * A set of monkey patches that sets up the required callbacks and/or worker threads so that AMQP will work with Passenger, Thin, or Mongrel. WEBrick, SCGI, and Evented Mongrel are experimentally supported, but not heavily tested.
+    * A Channel Pool. You can cause problems for yourself if you create new channels (with MQ.new) for every request. The pool sets up a few of these when your app starts and reuses them.
+    * YAML configuration files. If you’re using Rails or Merb, create config/amqp.yml, then fill in the details for development, test, and production. Use Qusion.start() in your environment.rb file and you’re good to go.
+    
+=== Carrot (async) -> http://github.com/famoseagle/carrot
+
+From the README:
+
+This client does not use eventmachine so no background thread necessary. As a result, it is much easier to use from script/console and Passenger. It also solves the problem of buffering messages and ack responses. For more details see this thread: http://groups.google.com/group/ruby-amqp/browse_thread/thread/fdae324a0ebb1961/fa185fdce1841b68
+
+There is currently no way to prevent buffering using eventmachine. Support for prefetch is still unreliable.
+
+=== Bunny (sync) -> http://github.com/celldee/bunny/
+
+Seems to be the best ruby client library around right now. It is based on AMQP and Carrot.
+
+=== Warren (messaging) -> http://github.com/brightbox/warren
+
+Library for sending and receiving messages, complete with en/decrypting messages on either side of the transport.
+
+It was written to handle sending messages between two nodes using RabbitMQ, which is why the two default adapters are for synchronous and asynchronous rabbitmq client libraries. You can delegate the sending & receiving to any custom class you want, simply by subclassing Warren::Queue. (Isn’t ruby magic marvelous!)
+
+The filtering works in much the same way as the adapter class. There is a default YAML filter that is always called last before sending the message and first when receiving the message, simply to make sure the message is a string when sent + received. You can then add custom classes onto the stack in any order you want, simply by subclassing Warren::MessageFilter. Add them in the same order on the receiving side and warren takes care of calling them in reverse order.
+
+
+== Important!!!
+
+Currently, as of 17/12/2009, there has been a change in the Bunny API introduced in 0.5.4rc1, published as 0.6.0, that breaks warren (v. 0.9.0). You can read more on this here: http://forum.brightbox.co.uk/forums/bigwig-warren-and-amqp/topics/bug-report-hash-not-being-unpacked-correctly
+
+A solution is being worked on and there will be a new release of Warren soon to accomodate this changes. Meanwhile there is a workaround in order to use warren with bunny:
+
+1. Uninstall bunny 0.6.0: sudo gem uninstall bunny
+2. Install bunny 0.5.3 from Github: sudo gem install celldee-bunny -s http://gems.github.com
+
+== Description of Contents
+
+amqp
+  Simple examples extracted from the amqp repo. There are many more: http://github.com/tmm1/amqp
+
+back_store
+  A receiver implemented with warren to receive the orders from the front_store rails demo app. When called, this script checks for pending messages in the queues, exiting if the queue is empty or printing out some info if there is an order in the queue.
+    
+front_store
+  Sample rails app using warren & bunny to hook up with AMQP listeners. On each after_save of the order model, a hash with the order data is built and sent to the queue.
+  
+warren
+  Sample sender/receiver implemented with warren and bunny.
+  
+
