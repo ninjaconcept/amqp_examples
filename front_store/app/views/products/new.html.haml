@@ -1,0 +1,10 @@
+%h1.heading
+  = 'New Product'
+  
+- semantic_form_for(@product) do |form|
+  = render 'form', :form => form
+  - form.buttons do
+    = form.commit_button 'Create'
+    
+%p.actions
+  = link_to 'Cancel', products_path

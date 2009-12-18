@@ -1,0 +1,1 @@
+require "warren/adapters/bunny_adapter"

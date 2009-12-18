@@ -1,0 +1,26 @@
+%h1.heading
+  = "Order %s" % @order.id
+  
+- content_tag_for(:dl, @order) do
+  %dt.label= 'Submmitted on'
+  %dd.state= h @order.try(:created_at)
+  %dt.label= 'State'
+  %dd.state= h @order.try(:state)
+  
+%table
+  %thead.header
+    %tr
+      %th.name= 'Name'
+      %th.description= 'Description'
+      %th.price= 'Price'
+  %tbody.items.products
+    - @order.products.each do |product|
+      - content_tag_for(:tr, product, :class => cycle(:odd, :even)) do
+        %td.name= h product.try(:name)
+        %td.description= h product.try(:description)
+        %td.price= h product.try(:price)
+        
+%p.actions
+  = link_to 'Edit', edit_order_path(@order)
+  |
+  = link_to 'Index', orders_path

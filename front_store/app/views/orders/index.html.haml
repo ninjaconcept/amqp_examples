@@ -1,0 +1,17 @@
+%h1.heading
+  = "Orders"
+  
+%p.actions
+  = link_to 'New Order', new_order_path
+  
+%table
+  %thead.header
+    %tr
+      %th.state= 'Submitted on'
+      %th.state= 'State'
+      %th.actions= 'Actions'
+  %tbody.items.orders
+    - @orders.each do |order|
+      = render 'item', :order => order
+      
+= will_paginate(@orders)

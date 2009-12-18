@@ -1,0 +1,15 @@
+%h1.heading
+  = "Product %s" % @product.id
+  
+- content_tag_for(:dl, @product) do
+  %dt.label= 'Name'
+  %dd.name= h @product.try(:name)
+  %dt.label= 'Description'
+  %dd.description= h @product.try(:description)
+  %dt.label= 'Price'
+  %dd.price= h @product.try(:price)
+  
+%p.actions
+  = link_to 'Edit', edit_product_path(@product)
+  |
+  = link_to 'Index', products_path

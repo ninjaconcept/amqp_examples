@@ -1,0 +1,18 @@
+%h1.heading
+  = "Products"
+  
+%p.actions
+  = link_to 'New Product', new_product_path
+  
+%table
+  %thead.header
+    %tr
+      %th.name= 'Name'
+      %th.description= 'Description'
+      %th.price= 'Price'
+      %th.actions= 'Actions'
+  %tbody.items.products
+    - @products.each do |product|
+      = render 'item', :product => product
+      
+= will_paginate(@products)

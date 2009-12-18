@@ -1,0 +1,9 @@
+- content_tag_for(:tr, order, :class => cycle(:odd, :even)) do
+  %td.state= h order.try(:created_at)
+  %td.state= h order.try(:state)
+  %td.actions
+    = link_to 'Show', order_path(order)
+    |
+    = link_to 'Edit', edit_order_path(order)
+    |
+    = link_to 'Destroy', order, :confirm => 'Are you sure?', :method => :delete

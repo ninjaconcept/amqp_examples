@@ -1,0 +1,7 @@
+development:
+    user: guest
+    pass: guest
+    host: localhost
+    logging: true
+    vhost: /
+    default_queue: main
